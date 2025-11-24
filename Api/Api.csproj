@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Middlewares\" />
+    <PackageReference Include="WolverineFx.Http.Marten" Version="5.3.0" />
   </ItemGroup>
 
 
