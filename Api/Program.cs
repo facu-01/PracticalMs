@@ -16,8 +16,6 @@ var app = builder.Build();
 
 
 app.ApplyMigration();
-app.UseStaticFiles();
-app.MapFallbackToFile("/index.html");
 
 app.MapWolverineEndpoints(opts =>
 {
