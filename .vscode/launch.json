@@ -6,6 +6,20 @@
     "configurations": [
         {
             "name": "C#: Api [http]",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/.devbox/nix/profile/default/bin/dotnet",
+            "args": ["run", "--project", "${workspaceFolder}/Api/Api.csproj"],
+            "cwd": "${workspaceFolder}/Api",
+            "stopAtEntry": false,
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Development",
+                "DOTNET_ROOT": "${workspaceFolder}/.devbox/nix/profile/default/share/dotnet"
+            }
+        },
+        {
+            "name": "C#: Api [http] new",
             "type": "dotnet",
             "request": "launch",
             "projectPath": "${workspaceFolder}\\Api\\Api.csproj",
