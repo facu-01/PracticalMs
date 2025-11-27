@@ -9,7 +9,7 @@ public static class HomePageEndpoint
     [WolverineGet("/")]
     public static IResult Get()
     {
-        return Results.Extensions.RazorSlice<Slices.Home, string>("Guest User");
+        return Results.Extensions.RazorSlice<Slices.Home, string>("Test User");
     }
 
 }
