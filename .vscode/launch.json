@@ -1,29 +1,11 @@
 {
-    // Use IntelliSense to learn about possible attributes.
-    // Hover to view descriptions of existing attributes.
-    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
-    "version": "0.2.0",
-    "configurations": [
-        {
-            "name": "C#: Api [http]",
-            "type": "coreclr",
-            "request": "launch",
-            "preLaunchTask": "build",
-            "program": "${workspaceFolder}/.devbox/nix/profile/default/bin/dotnet",
-            "args": ["run", "--project", "${workspaceFolder}/Api/Api.csproj"],
-            "cwd": "${workspaceFolder}/Api",
-            "stopAtEntry": false,
-            "env": {
-                "ASPNETCORE_ENVIRONMENT": "Development",
-                "DOTNET_ROOT": "${workspaceFolder}/.devbox/nix/profile/default/share/dotnet"
-            }
-        },
-        {
-            "name": "C#: Api [http] new",
-            "type": "dotnet",
-            "request": "launch",
-            "projectPath": "${workspaceFolder}\\Api\\Api.csproj",
-            "launchConfigurationId": "TargetFramework=;http"
-        }
-    ]
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "C#: Api",
+      "type": "dotnet",
+      "request": "launch",
+      "projectPath": "${workspaceFolder}/Api/Api.csproj"
+    }
+  ]
 }

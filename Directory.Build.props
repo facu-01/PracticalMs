@@ -1,0 +1,6 @@
+<Project>
+    <PropertyGroup>
+        <!-- Disable AppHost when DISABLE_APP_HOST environment variable is set -->
+        <UseAppHost Condition="'$(DISABLE_APP_HOST)' == '1'">false</UseAppHost>
+    </PropertyGroup>
+</Project>

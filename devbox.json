@@ -6,7 +6,8 @@
   "shell": {
     "init_hook": [
       "echo 'Welcome to devbox!' > /dev/null",
-      "export DOTNET_ROOT=$(dirname $(dirname $(readlink -f $(which dotnet))))"
+      "export DOTNET_ROOT=$(dirname $(dirname $(readlink -f $(which dotnet))))",
+      "export DISABLE_APP_HOST=1"
     ],
     "scripts": {
       "test": [
