@@ -1,18 +1,17 @@
-@inherits RazorLayoutSlice<LayoutModel>
+﻿@inherits LayoutComponentBase
+
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 
 <head>
-    <meta charset="utf-8">
-    <title>@Model.Title</title>
-
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link href="/css/fonts.css" rel="stylesheet">
     <link href="/css/bootstrap.min.css" rel="stylesheet">
     <script src="/js/jquery-3.2.1.slim.min.js"></script>
     <script src="/js/popper.min.js"></script>
     <script src="/js/bootstrap.bundle.min.js"></script>
-
-    @await RenderSectionAsync("head")
+    <title>Video Tutorials</title>
 </head>
 
 <body>
@@ -33,7 +32,7 @@
             </ul>
 
             <ul class="navbar-nav">
-                @if (Model.UserId != null)
+                @if (UserId != null)
                 {
                     <li class="nav-item">
                         <a class="nav-link" href="/auth/log-out">Logout</a>
@@ -49,16 +48,20 @@
                     </li>
                 }
             </ul>
-
-
         </div>
     </nav>
 
     <main class="container mt-4">
-        @await RenderBodyAsync()
+        @Body
     </main>
-
-    @await RenderSectionAsync("scripts")
 </body>
 
 </html>
+
+@code {
+    [Parameter]
+    public string Message { get; set; } = string.Empty;
+
+    [Parameter]
+    public string? UserId { get; set; }
+}
