@@ -1,0 +1,4 @@
+@base-url = http://localhost:5066
+
+### homepage
+GET {{base-url}}/
