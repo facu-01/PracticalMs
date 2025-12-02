@@ -1,0 +1,17 @@
+<h1>This is the home page</h1>
+
+<p>Viewers have watched @VideosWatched video(s).</p>
+
+
+<form action="/record-viewing/@VideoId" method="POST"
+    onsubmit="setTimeout(function() { window.location.reload(); }, 100); return true;">
+    <button type="submit">Record viewing video</button>
+</form>
+
+@code {
+    [Parameter]
+    public int VideosWatched { get; set; }
+
+    [Parameter]
+    public string VideoId { get; set; } = default!;
+}

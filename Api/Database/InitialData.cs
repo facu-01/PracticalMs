@@ -16,14 +16,23 @@ public class InitialData : IInitialData
 
     public async Task Populate(IDocumentStore store, CancellationToken cancellation)
     {
-        await using var session = store.LightweightSession();
 
-        foreach (var (id, videoUploaded) in _videos)
+        try
         {
-            session.Events.StartStream<Video>(id, videoUploaded);
-        }
+            await using var session = store.LightweightSession();
 
-        await session.SaveChangesAsync();
+            foreach (var (id, videoUploaded) in _videos)
+            {
+                session.Events.StartStream<Video>(id, videoUploaded);
+            }
+
+            await session.SaveChangesAsync();
+        }
+        catch (Marten.Exceptions.ExistingStreamIdCollisionException)
+        {
+
+
+        }
     }
 }
 
