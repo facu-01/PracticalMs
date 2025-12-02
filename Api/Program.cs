@@ -59,7 +59,18 @@ app.UseStaticFiles();
 
 
 
-app.ApplyMigration();
+// Enable OpenAPI/Swagger and ReDoc UI
+// Expose OpenAPI document
+app.MapOpenApi();
+
+// ReDoc UI using Swashbuckle.ReDoc, pointing to Microsoft.AspNetCore.OpenApi document
+app.UseReDoc(options =>
+{
+    options.DocumentTitle = "Open API - ReDoc";
+    options.SpecUrl("/openapi/v1.json");
+    options.RoutePrefix = "docs"; // change relative path to the UI
+});
+
 
 app.MapWolverineEndpoints(opts =>
 {
