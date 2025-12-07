@@ -2,3 +2,29 @@
 
 ### homepage
 GET {{base-url}}/
+
+
+
+### upload video
+POST {{base-url}}/videos
+Content-Type: application/json
+
+{
+    "title": "My First Video"
+}
+
+
+
+### RecordViewings
+POST {{base-url}}/record-viewing
+Content-Type: application/json
+
+{
+    "videoId": "019adcbc-f29b-4cd5-8a6a-22965e016290",
+    "userId": "123e4567-e89b-12d3-a456-426614174000"
+}
+
+
+
+### sin content type (DA ERROR 500)
+POST {{base-url}}/record-viewing

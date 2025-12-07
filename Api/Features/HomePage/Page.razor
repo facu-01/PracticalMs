@@ -3,10 +3,56 @@
 <p>Viewers have watched @VideosWatched video(s).</p>
 
 
-<form action="/record-viewing/@VideoId" method="POST"
-    onsubmit="setTimeout(function() { window.location.reload(); }, 100); return true;">
-    <button type="submit">Record viewing video</button>
-</form>
+<p>User 1 has watched @User1VideosWatched video(s).</p>
+
+<p>User 2 has watched @User2VideosWatched video(s).</p>
+
+
+
+<div>
+    <button type="button" onclick="recordViewingUser1()">Record viewing video for user 1</button>
+</div>
+
+<div>
+    <button type="button" onclick="recordViewingUser2()">Record viewing video for user 2</button>
+</div>
+
+<script>
+    async function recordViewingUser1() {
+        await recordViewing('@User1Id', '@VideoId');
+    }
+
+    async function recordViewingUser2() {
+        await recordViewing('@User2Id', '@VideoId');
+    }
+
+    async function recordViewing(userId, videoId) {
+        try {
+            const response = await fetch('/record-viewing', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    userId: userId,
+                    videoId: videoId
+                })
+            });
+
+            if (response.ok) {
+                location.reload();
+            } else {
+                console.error('Error recording viewing:', response.statusText);
+                alert('Error al registrar la visualización');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Error al registrar la visualización');
+        }
+    }
+</script>
+
+
 
 @code {
     [Parameter]
@@ -14,4 +60,18 @@
 
     [Parameter]
     public string VideoId { get; set; } = default!;
+
+
+    [Parameter]
+    public string User1Id { get; set; } = default!;
+
+    [Parameter]
+    public int User1VideosWatched { get; set; }
+
+    [Parameter]
+    public string User2Id { get; set; } = default!;
+
+    [Parameter]
+    public int User2VideosWatched { get; set; }
+
 }

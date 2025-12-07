@@ -46,6 +46,11 @@ Para el caso propuesto de llevar el contador de videos vistos total, se define u
 
 <https://wolverinefx.net/guide/durability/marten/event-sourcing.html>
 
+#### Extras
+
+* User videos watched count
+* Video watched count
+
 ## Conceptos de Event Sourcing
 
 ![alt text](image.png)

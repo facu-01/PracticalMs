@@ -31,16 +31,19 @@ opts =>
     opts.Connection(connectionString!);
     opts.DatabaseSchemaName = "videos";
 
-    // Registrar el aggregate Video para event sourcing
+    // Registramos los aggregates como snapshots inline
+    opts.Projections.Snapshot<User>(SnapshotLifecycle.Inline);
     opts.Projections.Snapshot<Video>(SnapshotLifecycle.Inline);
 
     // Registrar proyecciones
     opts.Projections.Add<GlobalVideoCounterProjection>(ProjectionLifecycle.Async);
 
     opts.AutoCreateSchemaObjects = AutoCreate.All;
+
+    opts.Events.UseIdentityMapForAggregates = true;
 })
 .UseLightweightSessions()
-.InitializeWith(new InitialData(InitialDatasets.VideosUploaded))
+.InitializeWith(new InitialData(InitialDatasets.VideosUploaded, InitialDatasets.UsersRegistered))
 .AddAsyncDaemon(DaemonMode.Solo)
 .IntegrateWithWolverine();
 
