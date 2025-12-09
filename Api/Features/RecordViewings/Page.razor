@@ -1,0 +1,38 @@
+﻿<h1>This is the home page</h1>
+
+<p>Viewers have watched @VideosWatched video(s).</p>
+
+<p>User 1 has watched @User1VideosWatched video(s).</p>
+
+<p>User 2 has watched @User2VideosWatched video(s).</p>
+
+<div hx-post="/record-viewings" hx-target="main" hx-trigger="click" hx-vals='{"videoId":"@VideoId","userId":"@User1Id"}'
+    hx-ext="json-enc" style="cursor: pointer; padding: 10px; border: 1px solid #ccc; display: inline-block;">
+    Record viewing video for user 1
+</div>
+
+<div hx-post="/record-viewings" hx-target="main" hx-trigger="click" hx-vals='{"videoId":"@VideoId","userId":"@User2Id"}'
+    hx-ext="json-enc" style="cursor: pointer; padding: 10px; border: 1px solid #ccc; display: inline-block;">
+    Record viewing video for user 2
+</div>
+
+@code {
+    [Parameter]
+    public int VideosWatched { get; set; }
+
+    [Parameter]
+    public string VideoId { get; set; } = default!;
+
+    [Parameter]
+    public string User1Id { get; set; } = default!;
+
+    [Parameter]
+    public int User1VideosWatched { get; set; }
+
+    [Parameter]
+    public string User2Id { get; set; } = default!;
+
+    [Parameter]
+    public int User2VideosWatched { get; set; }
+
+}
