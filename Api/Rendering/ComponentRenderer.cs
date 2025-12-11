@@ -49,6 +49,21 @@ public class ComponentRenderer
     }
 
     public async Task<string> RenderLayoutAsync<TLayout>(
+    string bodyContent)
+    where TLayout : LayoutComponentBase
+    {
+        var builder = new ComponentParameterBuilder<TLayout>();
+
+        // inyectamos el contenido del body como un RenderFragment
+        builder.Add(c => c.Body, b =>
+        {
+            b.AddMarkupContent(0, bodyContent);
+        });
+
+        return await RenderAsync<TLayout>(builder.Build());
+    }
+
+    public async Task<string> RenderLayoutAsync<TLayout>(
         string bodyContent,
         Action<ComponentParameterBuilder<TLayout>> configure)
         where TLayout : LayoutComponentBase

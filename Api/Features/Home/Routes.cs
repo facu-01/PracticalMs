@@ -11,7 +11,7 @@ namespace Api.Features.Home;
 
 public record RecordViewingsCommand(Guid VideoId, Guid UserId);
 
-public static class Route
+public static class Routes
 {
 
     private static async Task<string> RecordViewingsFragment(
@@ -61,12 +61,7 @@ public static class Route
 
 
         var fullPageHtml = await renderer.RenderLayoutAsync<Layout>(
-            bodyContent: fragment,
-            configure: builder =>
-            {
-                builder.Add(c => c.Message, "Welcome to the Home Page")
-                .Add(c => c.UserId, "1234");
-            }
+            bodyContent: fragment
         );
 
 

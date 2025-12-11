@@ -1,0 +1,30 @@
+﻿<h1>Register</h1>
+<form method="post" action="/register" hx-boost="true" hx-ext="json-enc">
+
+    <div class="form-group">
+        <label for="email">Email</label>
+        <input id="email" class="form-control @(Errors != null && Errors.ContainsKey("email") ? "is-invalid" : "")"
+            type="email" name="email" placeholder="email" />
+        @if (Errors != null && Errors.ContainsKey("email"))
+        {
+            <div class="invalid-feedback">@string.Join(", ", Errors["email"])</div>
+        }
+    </div>
+
+    <div class="form-group">
+        <label for="password">Password</label>
+        <input id="password"
+            class="form-control @(Errors != null && Errors.ContainsKey("password") ? "is-invalid" : "")" type="password"
+            name="password" placeholder="password" />
+        @if (Errors != null && Errors.ContainsKey("password"))
+        {
+            <div class="invalid-feedback">@string.Join(", ", Errors["password"])</div>
+        }
+    </div>
+
+    <button type="submit">Register!</button>
+</form>
+@code {
+    [Parameter]
+    public Dictionary<string, List<string>>? Errors { get; set; } = null;
+}

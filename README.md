@@ -23,7 +23,7 @@ Del lado de marten, estos tipos se pueden llevar en stream para los eventos y pa
 De las notas entonces:
 
 Eventos/Stream (libro) -> Eventos/Stream (WolverineFx)
-Comands/Stream (libro) -> Messages/CascadingMessages (WolverineFx)
+Comands/Stream (libro) -> Messages (pueden ser los requests http, o cualquier tipo de mensajes) /CascadingMessages (WolverineFx)
 
 Y para optimistic concurrency control
 
@@ -45,6 +45,22 @@ Para el caso propuesto de llevar el contador de videos vistos total, se define u
 <https://martendb.io/tutorials/cross-aggregate-views.html>
 
 <https://wolverinefx.net/guide/durability/marten/event-sourcing.html>
+
+### Capitulo 5
+
+No hace falta la implementacion de event store con subcripciones ya que martendb nos provee esta solucion.
+
+### Capitulo 6
+
+En el capitulo 6, se aborda el registro de usuarios.
+
+```mermaid
+stateDiagram
+    [*] --> isRegistered: Registered
+    isRegistered --> isLocked: AccountLocked
+    isLocked --> isRegistered: AccountUnlocked
+    isRegistered --> [*] : AccountClosed
+```
 
 #### Extras
 
