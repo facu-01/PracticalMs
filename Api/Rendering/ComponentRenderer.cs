@@ -5,126 +5,94 @@ using Microsoft.AspNetCore.Components.Web;
 
 namespace Api.Rendering;
 
-public class ComponentRenderer
+public class ComponentRenderer(IServiceProvider serviceProvider, ILoggerFactory loggerFactory)
 {
-    private readonly HtmlRenderer _renderer;
-
-    public ComponentRenderer(HtmlRenderer renderer)
-    {
-        _renderer = renderer;
-    }
-
-    public async Task<string> RenderAsync<TComponent>()
-        where TComponent : IComponent
-    {
-        return await RenderAsync<TComponent>(ParameterView.Empty);
-    }
-
     public async Task<string> RenderAsync<TComponent>(
-        Action<ComponentParameterBuilder<TComponent>> configure)
-        where TComponent : IComponent
+        Action<ComponentParameterBuilder<TComponent>>? parameterBuilder = null,
+        IDictionary<string, object?>? layoutParameters = null,
+        bool isPartial = false) where TComponent : IComponent
     {
-        var builder = new ComponentParameterBuilder<TComponent>();
-        configure(builder);
-        return await RenderAsync<TComponent>(builder.Build());
-    }
+        await using var htmlRenderer = new HtmlRenderer(serviceProvider, loggerFactory);
 
-    private async Task<string> RenderAsync<TComponent>(ParameterView parameters)
-        where TComponent : IComponent
-    {
-        var output = await _renderer.Dispatcher.InvokeAsync(async () =>
+        var parameters = new ComponentParameterBuilder<TComponent>();
+        parameterBuilder?.Invoke(parameters);
+        var dict = parameters.Build();
+
+        var output = await htmlRenderer.Dispatcher.InvokeAsync(async () =>
         {
-            var result = await _renderer.RenderComponentAsync<TComponent>(parameters);
-            return result.ToHtmlString();
+            return await htmlRenderer.RenderComponentWithLayoutAsync<TComponent>(
+                layoutParameters: layoutParameters,
+                componentParameters: dict,
+                isPartial: isPartial);
         });
 
         return output;
     }
-
-
-    public async Task<string> RenderLayoutAsync<TLayout>()
-        where TLayout : LayoutComponentBase
-    {
-        return await RenderAsync<TLayout>(ParameterView.Empty);
-    }
-
-    public async Task<string> RenderLayoutAsync<TLayout>(
-    string bodyContent)
-    where TLayout : LayoutComponentBase
-    {
-        var builder = new ComponentParameterBuilder<TLayout>();
-
-        // inyectamos el contenido del body como un RenderFragment
-        builder.Add(c => c.Body, b =>
-        {
-            b.AddMarkupContent(0, bodyContent);
-        });
-
-        return await RenderAsync<TLayout>(builder.Build());
-    }
-
-    public async Task<string> RenderLayoutAsync<TLayout>(
-        string bodyContent,
-        Action<ComponentParameterBuilder<TLayout>> configure)
-        where TLayout : LayoutComponentBase
-    {
-        var builder = new ComponentParameterBuilder<TLayout>();
-        configure(builder);
-
-        // inyectamos el contenido del body como un RenderFragment
-        builder.Add(c => c.Body, b =>
-        {
-            b.AddMarkupContent(0, bodyContent);
-        });
-
-        return await RenderAsync<TLayout>(builder.Build());
-    }
-
-
-    public class ComponentParameterBuilder<TComponent> where TComponent : IComponent
-    {
-        private readonly Dictionary<string, object?> _parameters = new();
-
-        /// <summary>
-        /// Agrega un parámetro al componente usando una expresión fuertemente tipada.
-        /// Solo acepta propiedades marcadas con [Parameter].
-        /// </summary>
-        public ComponentParameterBuilder<TComponent> Add<TValue>(
-            Expression<Func<TComponent, TValue>> parameterExpression,
-            TValue value)
-        {
-            if (parameterExpression.Body is not MemberExpression memberExpression)
-            {
-                throw new ArgumentException(
-                    "La expresión debe ser una propiedad del componente",
-                    nameof(parameterExpression));
-            }
-
-            var propertyInfo = memberExpression.Member as PropertyInfo;
-            if (propertyInfo == null)
-            {
-                throw new ArgumentException(
-                    "La expresión debe referenciar una propiedad",
-                    nameof(parameterExpression));
-            }
-
-            // Validar que la propiedad tenga el atributo [Parameter]
-            if (!propertyInfo.GetCustomAttributes<ParameterAttribute>().Any())
-            {
-                throw new InvalidOperationException(
-                    $"La propiedad '{propertyInfo.Name}' no está marcada con [Parameter]");
-            }
-
-            _parameters[propertyInfo.Name] = value;
-            return this;
-        }
-
-        public ParameterView Build()
-        {
-            return ParameterView.FromDictionary(_parameters);
-        }
-    }
-
 }
 
+public class ComponentParameterBuilder<TComponent>
+{
+    private readonly Dictionary<string, object?> _parameters = new();
 
+    public void Add<TProperty>(Expression<Func<TComponent, TProperty>> propertySelector, TProperty value)
+    {
+        if (propertySelector.Body is MemberExpression memberExpression)
+        {
+            _parameters[memberExpression.Member.Name] = value;
+        }
+        else
+        {
+            throw new ArgumentException("Expression must be a member expression");
+        }
+    }
+
+    public Dictionary<string, object?> Build() => _parameters;
+}
+
+public static class HtmlRendererExtensions
+{
+    public static async Task<string> RenderComponentWithLayoutAsync<T>(
+        this HtmlRenderer renderer,
+        IDictionary<string, object?>? layoutParameters = null,
+        IDictionary<string, object?>? componentParameters = null,
+        bool isPartial = false) where T : IComponent
+    {
+        var componentType = typeof(T);
+        var layoutAttribute = componentType.GetCustomAttribute<LayoutAttribute>();
+
+        var compParams = componentParameters != null
+            ? ParameterView.FromDictionary(componentParameters)
+            : ParameterView.Empty;
+
+        if (layoutAttribute != null && !isPartial)
+        {
+            var layoutType = layoutAttribute.LayoutType;
+
+            var layParams = layoutParameters != null
+                ? new Dictionary<string, object?>(layoutParameters)
+                : new Dictionary<string, object?>();
+
+            layParams["Body"] = (RenderFragment)(builder =>
+            {
+                builder.OpenComponent(0, componentType);
+
+                // Add parameters to the component
+                if (componentParameters != null)
+                {
+                    foreach (var param in componentParameters)
+                    {
+                        builder.AddAttribute(1, param.Key, param.Value);
+                    }
+                }
+
+                builder.CloseComponent();
+            });
+
+            var layout = await renderer.RenderComponentAsync(layoutType, ParameterView.FromDictionary(layParams));
+            return layout.ToHtmlString();
+        }
+
+        var output = await renderer.RenderComponentAsync<T>(compParams);
+        return output.ToHtmlString();
+    }
+}

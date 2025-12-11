@@ -4,6 +4,7 @@ using Api.Domain;
 using Api.Rendering;
 using Api.Rendering.Layouts;
 using Marten;
+using Microsoft.AspNetCore.Mvc;
 using Wolverine.Http;
 using Wolverine.Marten;
 
@@ -14,11 +15,12 @@ public record RecordViewingsCommand(Guid VideoId, Guid UserId);
 public static class Routes
 {
 
-    private static async Task<string> RecordViewingsFragment(
+    private static async Task<string> RecordViewings(
         ComponentRenderer renderer,
         int totalCount,
         int user1VideosWatched,
-        int user2VideosWatched
+        int user2VideosWatched,
+        bool isPartial = false
     )
     {
 
@@ -32,13 +34,13 @@ public static class Routes
             builder.Add(c => c.User2Id, InitialDatasets.UsersRegistered[1].Item1.ToString());
             builder.Add(c => c.User2VideosWatched, user2VideosWatched);
             builder.Add(c => c.VideoId, mockVideoId);
-        });
+        }, isPartial: isPartial);
         return bodyHtml;
     }
 
 
     [WolverineGet("/")]
-    public static async Task<IResult> Get(ComponentRenderer renderer, IDocumentSession session)
+    public static async Task<IResult> Get(IDocumentSession session, ComponentRenderer renderer)
     {
 
         var batchQuery = session.CreateBatchQuery();
@@ -53,29 +55,26 @@ public static class Routes
         var globalVideoCounter = await globalVideoCounterQuery;
         var totalCount = globalVideoCounter?.TotalVideoViews ?? 0;
 
-        string fragment = await RecordViewingsFragment(
+        string html = await RecordViewings(
             renderer,
             totalCount,
             user1?.VideosWatched ?? 0,
-            user2?.VideosWatched ?? 0);
+            user2?.VideosWatched ?? 0,
+            isPartial: false);
 
 
-        var fullPageHtml = await renderer.RenderLayoutAsync<Layout>(
-            bodyContent: fragment
-        );
-
-
-        return Results.Content(fullPageHtml, "text/html");
+        return Results.Content(html, "text/html");
     }
 
 
     [WolverinePost("/record-viewings")]
     public static async Task<(IResult, VideoViewed, UserVideoViewed)> Post(
        RecordViewingsCommand _,
+       [FromHeader(Name = "hx-request")] string? hxRequest,
        [WriteAggregate] Video video,
        [WriteAggregate] User user,
-       ComponentRenderer renderer,
-       IDocumentSession session
+       IDocumentSession session,
+       ComponentRenderer renderer
    )
     {
         var globalVideoCounter = await session.LoadAsync<GlobalVideoCounter>(GlobalVideoCounterProjection.Id);
@@ -85,8 +84,9 @@ public static class Routes
 
         var otherUser = await session.LoadAsync<User>(userToLoad);
 
+        bool isHtmx = !string.IsNullOrEmpty(hxRequest);
 
-        string bodyHtml = await RecordViewingsFragment(
+        string html = await RecordViewings(
             renderer,
             (globalVideoCounter?.TotalVideoViews ?? 0) + 1,
             user1VideosWatched: user.Id == InitialDatasets.UsersRegistered[0].Item1
@@ -94,11 +94,12 @@ public static class Routes
                 : otherUser?.VideosWatched ?? 0,
             user2VideosWatched: user.Id == InitialDatasets.UsersRegistered[1].Item1
                 ? user.VideosWatched + 1
-                : otherUser?.VideosWatched ?? 0
+                : otherUser?.VideosWatched ?? 0,
+            isPartial: isHtmx
         );
 
         return (
-            Results.Content(bodyHtml, "text/html"),
+            Results.Content(html, "text/html"),
             new VideoViewed(video.Id, user.Id),
             new UserVideoViewed(user.Id, video.Id)
         );

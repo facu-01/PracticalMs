@@ -14,13 +14,11 @@ using Marten.Events.Projections;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add Razor Components
-builder.Services.AddRazorComponents();
-builder.Services.AddScoped<HtmlRenderer>();
-builder.Services.AddScoped<ComponentRenderer>();
 
 // OpenAPI (ASP.NET Core 9)
 builder.Services.AddOpenApi();
+
+builder.Services.AddScoped<ComponentRenderer>();
 
 
 // Add Marten and Wolverine

@@ -18,21 +18,10 @@ public class Routes
         ComponentRenderer renderer
     )
     {
-        // Es una solicitud HTMX, devolvemos solo el fragmento del formulario
-        var bodyHtmlFragment = await renderer.RenderAsync<RegisterForm>();
 
+        var html = await renderer.RenderAsync<RegisterForm>(isPartial: !string.IsNullOrEmpty(hxRequest));
 
-        if (!string.IsNullOrEmpty(hxRequest))
-        {
-            return Results.Content(bodyHtmlFragment, "text/html");
-        }
-
-
-        var fullPageHtml = await renderer.RenderLayoutAsync<Layout>(
-            bodyContent: bodyHtmlFragment
-        );
-
-        return Results.Content(fullPageHtml, "text/html");
+        return Results.Content(html, "text/html");
     }
 
     [WolverinePost("/register")]
