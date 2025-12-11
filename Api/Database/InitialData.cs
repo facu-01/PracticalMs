@@ -54,8 +54,8 @@ public static class InitialDatasets
 
     public static readonly (Guid, UserRegistered)[] UsersRegistered =
     {
-       (Guid.Parse("a2f06238-05bb-4587-9d3a-2976c5c0d9a7"), new UserRegistered("User 1")),
-       (Guid.Parse("43006900-eb16-4afa-9c01-f85195d0f9fb"), new UserRegistered("User 2")),
+       (Guid.Parse("a2f06238-05bb-4587-9d3a-2976c5c0d9a7"), new UserRegistered(Guid.Parse("a2f06238-05bb-4587-9d3a-2976c5c0d9a7"), "testuser1@example.com", "passwordhash1")),
+       (Guid.Parse("43006900-eb16-4afa-9c01-f85195d0f9fb"), new UserRegistered(Guid.Parse("43006900-eb16-4afa-9c01-f85195d0f9fb"), "user2@example.com", "passwordhash2")),
     };
 
 

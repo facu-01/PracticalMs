@@ -15,10 +15,14 @@
         integrity="sha384-/TgkGk7p307TH7EXJDuUlgG3Ce1UVolAOFopFekQkkXihi5u/6OCvVKyz1W+idaz"
         crossorigin="anonymous"></script>
     <script src="https://unpkg.com/htmx-ext-json-enc@2.0.1/json-enc.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/htmx-ext-response-targets@2.0.4"
+        integrity="sha384-T41oglUPvXLGBVyRdZsVRxNWnOOqCynaPubjUVjxhsjFTKrFJGEMm3/0KGmNQ+Pg"
+        crossorigin="anonymous"></script>
     <title>Video Tutorials</title>
 </head>
 
-<body>
+<body hx-ext="response-targets">
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <a class="navbar-brand" href="#">Video Tutorials</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"

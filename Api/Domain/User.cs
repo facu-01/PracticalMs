@@ -1,13 +1,18 @@
 namespace Api.Domain;
 
-public record UserRegistered(string Name);
+public record UserRegistered(
+    Guid UserId,
+    string Email,
+    string PasswordHash);
 
 public record UserVideoViewed(Guid UserId, Guid VideoId);
 
 public class User
 {
     public Guid Id { get; set; }
-    public string Name { get; set; } = default!;
+    public string Email { get; set; } = default!;
+
+    public string PasswordHash { get; set; } = default!;
 
     public int VideosWatched { get; set; } = 0;
 
@@ -15,7 +20,8 @@ public class User
     {
         return new User
         {
-            Name = @event.Name
+            Email = @event.Email,
+            PasswordHash = @event.PasswordHash
         };
     }
 

@@ -1,33 +1,43 @@
 ﻿@using Api.Rendering.Layouts
 @layout Layout
 
-<h1>Register</h1>
-<form method="post" action="/register" hx-boost="true" hx-ext="json-enc">
+<div id="register-form">
+    <h1>Register</h1>
+    <form method="post" action="/register" hx-boost="true" hx-ext="json-enc" hx-target="#register-form"
+        hx-target-4*="#register-form">
 
-    <div class="form-group">
-        <label for="email">Email</label>
-        <input id="email" class="form-control @(Errors != null && Errors.ContainsKey("email") ? "is-invalid" : "")"
-            type="email" name="email" placeholder="email" />
-        @if (Errors != null && Errors.ContainsKey("email"))
-        {
-            <div class="invalid-feedback">@string.Join(", ", Errors["email"])</div>
-        }
-    </div>
+        <div class="form-group">
+            <label for="email">Email</label>
+            <input id="email" class="form-control @(Errors != null && Errors.ContainsKey("email") ? "is-invalid" : "")"
+                type="email" name="email" placeholder="email" value="@Email" />
+            @if (Errors != null && Errors.ContainsKey("email"))
+            {
+                <div class="invalid-feedback">@string.Join(", ", Errors["email"])</div>
+            }
+        </div>
 
-    <div class="form-group">
-        <label for="password">Password</label>
-        <input id="password"
-            class="form-control @(Errors != null && Errors.ContainsKey("password") ? "is-invalid" : "")" type="password"
-            name="password" placeholder="password" />
-        @if (Errors != null && Errors.ContainsKey("password"))
-        {
-            <div class="invalid-feedback">@string.Join(", ", Errors["password"])</div>
-        }
-    </div>
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input id="password"
+                class="form-control @(Errors != null && Errors.ContainsKey("password") ? "is-invalid" : "")"
+                type="password" name="password" placeholder="password" value="@Password" />
+            @if (Errors != null && Errors.ContainsKey("password"))
+            {
+                <div class="invalid-feedback">@string.Join(", ", Errors["password"])</div>
+            }
+        </div>
 
-    <button type="submit">Register!</button>
-</form>
+        <button type="submit">Register!</button>
+    </form>
+</div>
+
 @code {
     [Parameter]
     public Dictionary<string, List<string>>? Errors { get; set; } = null;
+
+    [Parameter]
+    public string? Email { get; set; }
+
+    [Parameter]
+    public string? Password { get; set; }
 }

@@ -11,6 +11,7 @@ using Api.Database;
 using Api.Domain;
 using JasperFx.Events.Projections;
 using Marten.Events.Projections;
+using FluentValidation;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -53,6 +54,10 @@ builder.Host.UseWolverine(opts =>
 
 builder.Services.AddWolverineHttp();
 
+
+builder.Services.AddValidatorsFromAssemblyContaining<Program>(); // o cualquier tipo del ensamblado
+
+
 var app = builder.Build();
 
 
@@ -76,6 +81,7 @@ app.UseReDoc(options =>
 app.MapWolverineEndpoints(opts =>
 {
     opts.AddMiddleware<CorrelationMiddleware>();
+    opts.AddMiddleware<HtmxMiddleware>();
 });
 
 app.UseMiddleware<ExceptionHandlerMiddleware>();
