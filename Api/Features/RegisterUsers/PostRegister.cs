@@ -1,15 +1,16 @@
-
-
 using System.Net;
 using Api.Domain;
-using Api.Features.RegisterUsers;
 using Api.Middlewares;
 using Api.Rendering;
 using FluentValidation;
 using Marten;
+using Marten.Exceptions;
 using Microsoft.AspNetCore.Identity;
+using Wolverine.Attributes;
+using Wolverine.ErrorHandling;
 using Wolverine.Http;
 using Wolverine.Marten;
+using Wolverine.Runtime.Handlers;
 
 namespace Api.Features.RegisterUsers;
 
@@ -30,9 +31,23 @@ public class RegisterCommandValidator : AbstractValidator<RegisterCommand>
     }
 }
 
+public class ConcurrencyHandlerMiddleware
+{
+    // Wolverine only recognizes Before/After/Finally middleware hooks
+    public IResult? Finally(Exception? ex, HttpContext context)
+    {
+        if (ex is not null)
+        {
+            context.Response.StatusCode = 407;
+            return Results.Problem("Error interno del servidor");
+        }
+
+        return null;
+    }
+}
+
 public static class PostRegisterEndpoint
 {
-
 
     public static async Task<IResult> ValidateAsync(
         RegisterCommand command,
@@ -92,20 +107,22 @@ public static class PostRegisterEndpoint
 
 
     [WolverinePost("/register")]
+    [Middleware(typeof(ConcurrencyHandlerMiddleware))]
     public static async Task<(IResult, IStartStream)> PostRegister(
         RegisterCommand command
     )
     {
         var clearEmail = command.Email.Trim();
 
-        var passwordHasher = new PasswordHasher<object>();
+        // var passwordHasher = new PasswordHasher<object>();
 
-        var passwordHash = passwordHasher.HashPassword(null, command.Password);
+        // var passwordHash = passwordHasher.HashPassword(null, command.Password);
 
         var userRegistered = new UserRegistered(
             Guid.NewGuid(),
             clearEmail,
-            passwordHash
+            // passwordHash,
+            command.Password
         );
 
         var startStream = MartenOps.StartStream<User>(userRegistered);

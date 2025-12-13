@@ -84,7 +84,7 @@ app.MapWolverineEndpoints(opts =>
     opts.AddMiddleware<HtmxMiddleware>();
 });
 
-app.UseMiddleware<ExceptionHandlerMiddleware>();
+// app.UseMiddleware<ExceptionHandlerMiddleware>();
 
 
 // reemplaza al app.Run(), dando posibilidad de ejecutar comandos JasperFx.

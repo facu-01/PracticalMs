@@ -1,3 +1,5 @@
+using Marten.Schema;
+
 namespace Api.Domain;
 
 public record UserRegistered(
@@ -10,6 +12,8 @@ public record UserVideoViewed(Guid UserId, Guid VideoId);
 public class User
 {
     public Guid Id { get; set; }
+
+    [UniqueIndex]
     public string Email { get; set; } = default!;
 
     public string PasswordHash { get; set; } = default!;
