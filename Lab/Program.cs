@@ -16,11 +16,11 @@ class Program
             var tasks = new Task[numberOfRequests];
 
             Console.WriteLine($"Iniciando {numberOfRequests} peticiones paralelas...\n");
-
+            var posix = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
             for (int i = 0; i < numberOfRequests; i++)
             {
                 int requestNumber = i + 1;
-                tasks[i] = MakeRequest(client, endpoint, requestNumber);
+                tasks[i] = MakeRequest(client, endpoint, requestNumber, posix);
             }
 
             await Task.WhenAll(tasks);
@@ -28,13 +28,13 @@ class Program
         }
     }
 
-    static async Task MakeRequest(HttpClient client, string endpoint, int requestNumber)
+    static async Task MakeRequest(HttpClient client, string endpoint, int requestNumber, long posix)
     {
         try
         {
             var payload = new
             {
-                email = $"test_concurrencia_19@test.com",
+                email = $"test_concurrencia_{posix}@test.com",
                 password = $"12345678_r{requestNumber}"
             };
 

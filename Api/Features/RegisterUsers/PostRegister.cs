@@ -3,9 +3,12 @@ using Api.Domain;
 using Api.Middlewares;
 using Api.Rendering;
 using FluentValidation;
+using JasperFx.CodeGeneration;
+using JasperFx.CodeGeneration.Frames;
 using Marten;
 using Marten.Exceptions;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Wolverine.Attributes;
 using Wolverine.ErrorHandling;
 using Wolverine.Http;
@@ -31,20 +34,44 @@ public class RegisterCommandValidator : AbstractValidator<RegisterCommand>
     }
 }
 
-public class ConcurrencyHandlerMiddleware
+public class CatchConflictFrame : AsyncFrame
 {
-    // Wolverine only recognizes Before/After/Finally middleware hooks
-    public IResult? Finally(Exception? ex, HttpContext context)
+    public override void GenerateCode(GeneratedMethod method, ISourceWriter writer)
     {
-        if (ex is not null)
-        {
-            context.Response.StatusCode = 407;
-            return Results.Problem("Error interno del servidor");
-        }
+        // try {
+        writer.Write("BLOCK:try");
+        Next?.GenerateCode(method, writer);
+        writer.FinishBlock(); // cierra el try
 
-        return null;
+        // catch (DocumentAlreadyExistsException e) {
+        writer.Write($"BLOCK:catch({typeof(DocumentAlreadyExistsException).FullName} e)");
+        writer.Write($"await {typeof(CatchConflictFrame).FullName}.{nameof(RespondWithProblemDetails)}(e, httpContext);");
+        writer.Write("return;");
+        writer.FinishBlock(); // cierra el catch
+
+    }
+
+    public static Task RespondWithProblemDetails(Exception ex, HttpContext context)
+    {
+        var detail = ex switch
+        {
+            DocumentAlreadyExistsException dae => dae.Message,
+            Npgsql.PostgresException pg when pg.SqlState == "23505" => pg.MessageText,
+            _ => ex.Message
+        };
+
+        var problems = new ProblemDetails
+        {
+            Title = "Conflicto de datos",
+            Detail = detail,
+            Status = StatusCodes.Status409Conflict,
+            Instance = context.Request.Path
+        };
+
+        return Results.Problem(problems).ExecuteAsync(context);
     }
 }
+
 
 public static class PostRegisterEndpoint
 {
@@ -106,8 +133,15 @@ public static class PostRegisterEndpoint
     }
 
 
+    public static void Configure(HttpChain chain)
+    {
+        chain.Middleware.Insert(0, new CatchConflictFrame());
+
+        // Documenta OpenAPI: devuelve problem+json 409
+        chain.Metadata.ProducesProblem(409);
+    }
+
     [WolverinePost("/register")]
-    [Middleware(typeof(ConcurrencyHandlerMiddleware))]
     public static async Task<(IResult, IStartStream)> PostRegister(
         RegisterCommand command
     )
